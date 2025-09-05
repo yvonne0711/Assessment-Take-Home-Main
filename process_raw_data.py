@@ -21,6 +21,14 @@ def get_author_mapping(database) -> dict:
     conn.close()
     return author_mapping_conversion
 
+def clean_author_id(author_id: str) -> int:
+    """Clean author_id returning an integer."""
+    clean_author_id = author_id.replace(".", "")
+    if author_id and clean_author_id.isdigit():
+        return int(float(author_id))
+    else:
+        return None
+
 def clean_title(title: str) -> str:
     """Clean the book title returning the main title."""
     if not title:
@@ -29,6 +37,14 @@ def clean_title(title: str) -> str:
     main_title = title.split("(")[0]
     clean_title = main_title.strip()
     return clean_title
+
+
+def clean_year(year: str) -> int:
+    """Clean year column, returning an int."""
+    if year and year.isdigit():
+        return int(year)
+    else:
+        return None
 
 def clean_rating(rating: str) -> float:
     """Clean rating column, returning a float."""
@@ -44,24 +60,64 @@ def clean_ratings(ratings: str) -> int:
     else:
         return None
     
-def clean_full_data(file: str, database):
-    """Clean all of the data."""
+def get_rating_value(row: dict) -> float:
+    """Extract rating value for sorting."""
+    if row["rating"] is not None:
+        return row["rating"]
+    else:
+        return 0.0
 
-    rows = []
+
+def clean_full_data(file: str, database, output_file: str):
+    """Clean all of the data and output into a csv file."""
+
+    output_rows = []
+    author_map = get_author_mapping(database)
 
     with open(file, "r") as f:
         reader = csv.DictReader(f)
 
         for row in reader:
-            author_id = row["author_id"]
 
-            author_map = get_author_mapping(database)
+            title = clean_title(row["book_title"])
+            author_id = clean_author_id((row["author_id"]))
+            year = clean_year(row["Year released"])
+            rating = clean_rating(row["Rating"])
+            ratings = clean_ratings(row["ratings"])
+
             author_name = author_map.get(author_id)
 
+            if title and author_name and year and rating and ratings:
+                output_rows.append({
+                    "title" : title,
+                    "author_name": author_name,
+                    "year": year,
+                    "rating": rating,
+                    "ratings": ratings
+                })
+    
+    # order rows
+    ordered_rows = sorted(output_rows, key=get_rating_value, reverse=True)
+
+    # remove exisiting file
+    if path.exists(output_file):
+        remove(output_file)
+    
+    # write to csv
+    with open(output_file, "w") as f:
+        columns = ["title", "author_name", "year", "rating", "ratings"]
+        writer = csv.DictWriter(f, fieldnames=columns)
+        writer.writeheader()
+        writer.writerows(ordered_rows)
+
+    logging.info("CSV file successfully written.")
+
+    return ordered_rows
 
 if __name__ == "__main__":
     logging.info("Processing started")
-    print(get_author_mapping("data/authors.db"))
+    # print(get_author_mapping("data/authors.db"))
+    print(clean_full_data("data/RAW_DATA_4.csv", "data/authors.db", "data/TEST_DATA_4.csv"))
 
 
 
