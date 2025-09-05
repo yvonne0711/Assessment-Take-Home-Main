@@ -114,10 +114,28 @@ def clean_full_data(file: str, database, output_file: str):
 
     return ordered_rows
 
+
+def get_command_line_arguments():
+    """Extract command line arguments."""
+    # read the argument variable
+    parser = ArgumentParser(
+        description="Command lines for raw csv files into an output file.")
+
+    parser.add_argument("file", help="The CSV file inputted",type=str)
+
+    # read the argument variable
+    args = parser.parse_args()
+    return args.file
+
+
 if __name__ == "__main__":
     logging.info("Processing started")
-    # print(get_author_mapping("data/authors.db"))
-    print(clean_full_data("data/RAW_DATA_4.csv", "data/authors.db", "data/TEST_DATA_4.csv"))
+    file = get_command_line_arguments()
+
+    database = "data/authors.db"
+    output_file = "PROCESSED_DATA_4.csv"
+
+    print(clean_full_data(file, database, output_file))
 
 
 
