@@ -127,4 +127,4 @@ if __name__ == "__main__":
     DATABASE = "data/authors.db"
     OUTPUT_FILE = "PROCESSED_DATA_4.csv"
 
-    print(clean_full_data(file, DATABASE, OUTPUT_FILE))
+    clean_full_data(file, DATABASE, OUTPUT_FILE)
