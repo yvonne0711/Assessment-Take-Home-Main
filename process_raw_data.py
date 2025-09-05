@@ -1,6 +1,7 @@
 """A script to process book data."""
 
 import pandas as pd
+import csv
 import sqlite3
 from os import makedirs, path, remove
 from argparse import ArgumentParser
@@ -20,9 +21,34 @@ def get_author_mapping(database) -> dict:
     conn.close()
     return author_mapping_conversion
 
+def clean_title(title: str) -> str:
+    """Cleans the book title."""
+    if not title:
+        return None
+    
+    main_title = title.split("(")[0]
+    clean_title = main_title.strip()
+    return clean_title
+
+
+def clean_full_data(file: str, database):
+    """Clean all of the data."""
+
+    rows = []
+
+    with open(file, "r") as f:
+        reader = csv.DictReader(f)
+
+        for row in reader:
+            author_id = row["author_id"]
+
+            author_map = get_author_mapping(database)
+            author_name = author_map.get(author_id)
 
 
 if __name__ == "__main__":
     logging.info("Processing started")
     print(get_author_mapping("data/authors.db"))
+
+
 
