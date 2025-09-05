@@ -22,7 +22,7 @@ def get_author_mapping(database) -> dict:
     return author_mapping_conversion
 
 def clean_title(title: str) -> str:
-    """Cleans the book title."""
+    """Clean the book title returning the main title."""
     if not title:
         return None
     
@@ -30,7 +30,20 @@ def clean_title(title: str) -> str:
     clean_title = main_title.strip()
     return clean_title
 
+def clean_rating(rating: str) -> float:
+    """Clean rating column, returning a float."""
+    if rating:
+        return float(rating.replace(",", "."))
+    else:
+        return None
 
+def clean_ratings(ratings: str) -> int:
+    """Clean ratings column, returning an integer."""
+    if ratings:
+        return int(ratings.replace("`", ""))
+    else:
+        return None
+    
 def clean_full_data(file: str, database):
     """Clean all of the data."""
 
