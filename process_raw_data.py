@@ -7,6 +7,8 @@ from os import path, remove
 from argparse import ArgumentParser
 import logging
 
+logging.basicConfig(level=logging.INFO)
+
 def get_author_mapping(database_name) -> dict:
     """Return a dict mapping with author_id and author_name."""
     conn = sqlite3.connect(database_name)
