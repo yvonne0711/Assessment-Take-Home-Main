@@ -59,34 +59,33 @@ def get_rating_value(row: dict) -> float:
         return row["rating"]
     return 0.0
 
-
-def clean_full_data(input_file: str, database_name, outputted_file: str) -> list[dict]:
-    """Clean all of the data and output into a csv file."""
+def clean_full_data(csv_files: list[str], database_name, outputted_file: str) -> list[dict]:
+    """Clean all of the data from multiple csv files and output into a csv file."""
 
     output_rows = []
     author_map = get_author_mapping(database_name)
 
-    with open(input_file, "r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
+    for input_file in csv_files:
+        with open(input_file, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
 
-        for row in reader:
+            for row in reader:
+                title = clean_title(row["book_title"])
+                author_id = clean_author_id((row["author_id"]))
+                year = clean_year(row["Year released"])
+                rating = clean_rating(row["Rating"])
+                ratings = clean_ratings(row["ratings"])
 
-            title = clean_title(row["book_title"])
-            author_id = clean_author_id((row["author_id"]))
-            year = clean_year(row["Year released"])
-            rating = clean_rating(row["Rating"])
-            ratings = clean_ratings(row["ratings"])
+                author_name = author_map.get(author_id)
 
-            author_name = author_map.get(author_id)
-
-            if title and author_name and year and rating and ratings:
-                output_rows.append({
-                    "title" : title,
-                    "author_name": author_name,
-                    "year": year,
-                    "rating": rating,
-                    "ratings": ratings
-                })
+                if title and author_name and year and rating and ratings:
+                    output_rows.append({
+                        "title" : title,
+                        "author_name": author_name,
+                        "year": year,
+                        "rating": rating,
+                        "ratings": ratings
+                    })
 
     # order rows
     ordered_rows = sorted(output_rows, key=get_rating_value, reverse=True)
@@ -113,7 +112,7 @@ def get_command_line_arguments():
     parser = ArgumentParser(
         description="Command lines for raw csv files into an output file.")
 
-    parser.add_argument("file", help="The CSV file inputted",type=str)
+    parser.add_argument("file", help="The CSV file inputted",type=str, nargs="+")
 
     # read the argument variable
     args = parser.parse_args()
@@ -122,9 +121,9 @@ def get_command_line_arguments():
 
 if __name__ == "__main__":
     logging.info("Processing started")
-    file = get_command_line_arguments()
+    files = get_command_line_arguments()
 
     DATABASE = "data/authors.db"
-    OUTPUT_FILE = "PROCESSED_DATA_4.csv"
+    OUTPUT_FILE = "PROCESSED_DATA.csv"
 
-    clean_full_data(file, DATABASE, OUTPUT_FILE)
+    clean_full_data(files, DATABASE, OUTPUT_FILE)
